@@ -20,6 +20,7 @@ use Twig\Environment;
 use Twig\Extension\DebugExtension;
 use Twig\Extra\Html\HtmlExtension;
 use Twig\Loader\FilesystemLoader;
+use Composer\Satis\Git;
 
 class WebBuilder extends Builder
 {
@@ -153,11 +154,24 @@ class WebBuilder extends Builder
         foreach ($groupedPackages as $name => $packages) {
             $highest = $this->getHighestVersion($packages);
 
+            $repo = $this->getHighestVersion($packages)->getRepository();
+            if ($repo->getRepoConfig()['type'] == 'git') {
+                $repoDriver = $repo->getDriver();
+
+                $dir = (fn() => $this->repoDir)->call($repoDriver);
+
+                $collabs = (new Git())
+                    ->setDir($dir)
+                    ->getCollaborators();
+            }
+
             $mappedPackages[$name] = [
                 'highest' => $highest,
                 'abandoned' => $highest instanceof CompletePackageInterface ? $highest->isAbandoned() : false,
                 'replacement' => $highest instanceof CompletePackageInterface ? $highest->getReplacementPackage() : null,
+                'release' => $highest instanceof CompletePackageInterface && $highest->getReleaseDate() ? $highest->getReleaseDate()->format("d-m-Y") : null,
                 'versions' => $this->getDescSortedVersions($packages),
+                'collaborators' => $collabs ?? []
             ];
         }
 
