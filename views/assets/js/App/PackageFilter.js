@@ -9,12 +9,14 @@ class PackageFilter {
    * @param {string} itemContainer - The element containing all packages
    * @param {string} item - A single package
    * @param {string} filterBy - Specific field to search within, for each package
+   * @param {string} ownPackagesOnly - The element containing checkbox for own packages only
    */
-  constructor(searchField, itemContainer, item, filterBy) {
+  constructor(searchField, itemContainer, item, filterBy, ownPackagesOnly) {
     // Elements
     this.searchField = document.querySelector(searchField);
     this.itemContainer = document.querySelector(itemContainer);
     this.filterBy = document.querySelector(filterBy);
+    this.ownPackagesOnly = document.querySelector(ownPackagesOnly);
     this.allPackages = Array.prototype.slice.call(
       this.itemContainer.querySelectorAll(item)
     );
@@ -54,9 +56,10 @@ class PackageFilter {
 
   filterPackages() {
     const needle = this.searchField.value.toLowerCase();
+    const own_packages_only = this.ownPackagesOnly.checked;
 
     // No input to filter by
-    if (!needle.length) {
+    if (!needle.length && !own_packages_only) {
       this.allPackages.forEach((elem) => elem.classList.remove("d-none"));
       return;
     }
@@ -71,13 +74,27 @@ class PackageFilter {
             .textContent
         : elem.textContent;
 
+      // Get the "own_packages_only" field
+      let is_own = true;
+
+      if (own_packages_only) {
+        is_own = false;
+
+        window.config.own_packages.forEach((packageName) => {
+          if (filterableContent.toLowerCase().indexOf(packageName) !== -1) {
+            is_own = true;
+          }
+        });
+      }
+
       // Does the search term exist within the given content?
       const displayPackage =
         filterableContent.toLowerCase().indexOf(needle) !== -1;
-      if (displayPackage) {
+      if (displayPackage && is_own) {
         elem.classList.remove("d-none");
       }
     });
+
     this.itemContainer.classList.remove("d-none");
   }
 
@@ -100,6 +117,9 @@ class PackageFilter {
     this.filterBy.addEventListener("change", (event) =>
       this.handleFilterByChange(event)
     );
+    this.ownPackagesOnly.addEventListener("click", (event) => {
+      this.filterPackages();
+    });
     this.searchField.addEventListener("search", () => {
       if (!this.searchField.value) {
         this.updateHash();

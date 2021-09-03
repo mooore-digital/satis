@@ -68,6 +68,9 @@ class WebBuilder extends Builder
             'packages' => $mappedPackages,
             'dependencies' => $this->dependencies,
             'fieldsToToggle' => $this->fieldsToToggle,
+            'window_config' => [
+                "own_packages" => $this->config['own_packages'] ?? []
+            ]
         ]);
 
         file_put_contents($this->outputDir . '/index.html', $content);

@@ -19,7 +19,13 @@ document.addEventListener("DOMContentLoaded", function () {
     ".filter-field",
     ".default-filter-field"
   );
-  new PackageFilter("input#search", "#package-list", ".card", ".filter-field");
+  new PackageFilter(
+    "input#search",
+    "#package-list",
+    ".card",
+    ".filter-field",
+    "input[name='focus_own']"
+  );
 
   // Copy code snippet from a release for a project's composer.json
   new CopySnippet(
