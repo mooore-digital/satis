@@ -16,11 +16,11 @@ namespace Composer\Satis\Builder;
 use Composer\Package\CompletePackageInterface;
 use Composer\Package\PackageInterface;
 use Composer\Package\RootPackageInterface;
+use Composer\Satis\Git;
 use Twig\Environment;
 use Twig\Extension\DebugExtension;
 use Twig\Extra\Html\HtmlExtension;
 use Twig\Loader\FilesystemLoader;
-use Composer\Satis\Git;
 
 class WebBuilder extends Builder
 {

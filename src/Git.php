@@ -5,11 +5,7 @@ namespace Composer\Satis;
 use Exception;
 
 class Git {
-    private $location = null;
-
-    public function __construct() {
-
-    }
+    private ?string $location = null;
 
     public function setDir(string $location): Git {
         $this->location = $location;
@@ -18,6 +14,10 @@ class Git {
     }
 
     public function getCollaborators() {
+        if ($this->location === null) {
+            return null;
+        }
+
         $resp = $this->runGitCommand("log --format='{\"name\": \"%aN\", \"email\": \"%aE\"}'  | sort |  uniq -c | sort -nr");
 
         $lines = explode("\n", $resp);

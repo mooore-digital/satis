@@ -81,7 +81,14 @@ class PackageFilter {
         is_own = false;
 
         window.config.own_packages.forEach((packageName) => {
-          if (filterableContent.toLowerCase().indexOf(packageName) !== -1) {
+          if (
+            elem
+              .querySelector(".field-name")
+              .textContent.trim()
+              .split("/")[0]
+              .toLowerCase()
+              .indexOf(packageName) !== -1
+          ) {
             is_own = true;
           }
         });
