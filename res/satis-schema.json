@@ -380,6 +380,10 @@
             "type": "boolean",
             "description": "Defaults to true. When false, the JSON_PRETTY_PRINT option will not be used on encoding.",
             "default": true
+        },
+        "own_packages": {
+            "type": "array",
+            "description": "A list of packages that is owned by the current owner, gets used by the filter checkmark"
         }
     }
 }

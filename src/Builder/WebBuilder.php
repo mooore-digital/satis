@@ -16,6 +16,7 @@ namespace Composer\Satis\Builder;
 use Composer\Package\CompletePackageInterface;
 use Composer\Package\PackageInterface;
 use Composer\Package\RootPackageInterface;
+use Composer\Satis\Git;
 use Twig\Environment;
 use Twig\Extension\DebugExtension;
 use Twig\Extra\Html\HtmlExtension;
@@ -68,6 +69,9 @@ class WebBuilder extends Builder
             'packages' => $mappedPackages,
             'dependencies' => $this->dependencies,
             'fieldsToToggle' => $this->fieldsToToggle,
+            'window_config' => [
+                "own_packages" => $this->config['own_packages'] ?? []
+            ]
         ]);
 
         file_put_contents($this->outputDir . '/index.html', $content);
@@ -150,11 +154,24 @@ class WebBuilder extends Builder
         foreach ($groupedPackages as $name => $packages) {
             $highest = $this->getHighestVersion($packages);
 
+            $repo = $this->getHighestVersion($packages)->getRepository();
+            if ($repo->getRepoConfig()['type'] == 'git') {
+                $repoDriver = $repo->getDriver();
+
+                $dir = (fn() => $this->repoDir)->call($repoDriver);
+
+                $collabs = (new Git())
+                    ->setDir($dir)
+                    ->getCollaborators();
+            }
+
             $mappedPackages[$name] = [
                 'highest' => $highest,
                 'abandoned' => $highest instanceof CompletePackageInterface ? $highest->isAbandoned() : false,
                 'replacement' => $highest instanceof CompletePackageInterface ? $highest->getReplacementPackage() : null,
+                'release' => $highest instanceof CompletePackageInterface && $highest->getReleaseDate() ? $highest->getReleaseDate()->format("d-m-Y") : null,
                 'versions' => $this->getDescSortedVersions($packages),
+                'collaborators' => $collabs ?? []
             ];
         }
 

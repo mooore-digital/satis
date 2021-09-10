@@ -1,14 +1,26 @@
 {% set row_class  = 'row mb-0' %}
 {% set col1_class = 'col-sm-3 col-md-2' %}
 {% set col2_class = 'col-sm-9 col-md-10' %}
+{% set is_own = false %}
+{% for pkg in window_config.own_packages %}
+    {% if pkg in package.highest.name %}
+        {% set is_own = true %}
+    {% endif %}
+{% endfor %}
 
 <div class="card {% if package.abandoned %}border-danger{% else %}border-primary{% endif %} mb-3">
     <div id="{{ package.highest.name }}" class="card-header field-name filter-by {% if package.abandoned %}bg-danger{% else %}bg-primary{% endif %}">
-        <a href="#{{ package.highest.name }}" class="text-white">
-            <svg class="octicon-link" width="16" height="16">
+        <a href="#{{ package.highest.name }}" class="text-white d-flex align-items-center">
+            <svg class="octicon-link mr-1" width="16" height="16">
                 <use xlink:href="#octicon-link"></use>
             </svg>
             {{ package.highest.name }}
+
+            {% if is_own %}
+                <svg class="mooore-icon ml-auto" width="24" height="24" fill="currentColor">
+                    <use xlink:href="#mooore-icon"></use>
+                </svg>
+            {% endif %}
         </a>
 
         {% if package.abandoned %}
@@ -38,6 +50,11 @@
             <dd class="{{ col2_class }} field-type filter-by">{{ package.highest.type }}</dd>
         {% endif %}
 
+        {% if package.release %}
+            <dt class="{{ col1_class }} field-type">Last Updated At</dt>
+            <dd class="{{ col2_class }} field-type filter-by">{{ package.release }}</dd>
+        {% endif %}
+
         {% if package.highest.keywords %}
             <dt class="{{ col1_class }} field-keywords">Keywords</dt>
             <dd class="{{ col2_class }} field-keywords filter-by">
@@ -64,11 +81,20 @@
             <dd class="{{ col2_class }} field-authors filter-by">
                 {% for author in package.highest.authors %}
                     {%- if author.homepage -%}
-                        <a href="{{ author.homepage }}">{{ author.name }}</a>
+                        <a href="{{ author.homepage }}">{{ author.name }},</a>
                     {%- else -%}
-                        {{ author.name }}
+                        {{ author.name }},
                     {%- endif -%}
                     {%- if not loop.last -%}, {% endif -%}
+                {% endfor %}
+            </dd>
+        {% endif %}
+
+        {% if package.collaborators %}
+            <dt class="{{ col1_class }} field-authors">Collaborators</dt>
+            <dd class="{{ col2_class }} field-authors filter-by">
+                {% for collaborator in package.collaborators %}
+                    <a href="mailto:{{ collaborator.email }}">{{ collaborator.name }}, </a>
                 {% endfor %}
             </dd>
         {% endif %}
